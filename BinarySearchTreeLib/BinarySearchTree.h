@@ -25,13 +25,14 @@ private:
 	};
 	Node* root;
 
+	int s = 0;
+
 	Node* insert(Node* n, const KeyType& k, const ValueType& v)
 	{
-		Node* t;
 		if (n == nullptr)
 		{
-			t = new Node(k, v);
-			return t;
+			s++;
+			return new Node(k ,v);
 		}
 
 		if (k < n->key)
@@ -57,7 +58,7 @@ private:
 		}
 	};
 
-	ValueType* find(Node* n, const KeyType& k)
+	Node* find(Node* n, const KeyType& k)
 	{
 		if (!n)
 			throw std::domain_error("critical exception");
@@ -70,11 +71,27 @@ private:
 		else
 			throw std::domain_error("element not found");
 	};
+
+	void clean(Node* n)
+	{
+		if (n)
+		{
+			clean(n->left);
+			clean(n->right);
+			delete n;
+			s = 0;
+		}
+	};
 public:
 
 	BinarySearchTree()
 	{
 		root = nullptr;
+	};
+
+	~BinarySearchTree()
+	{
+		clean(root);
 	};
 
 	size_t size() const;
@@ -97,7 +114,8 @@ public:
 
 	ValueType* find(KeyType const& key)
 	{
-		 return find(this->root, key);
+		  Node* t = find(this->root, key);
+		  return t->value;
 	};
 
 	std::string toString() const;

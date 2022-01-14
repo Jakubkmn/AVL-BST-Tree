@@ -25,10 +25,17 @@ private:
 	};
 	Node* root;
 
+	int s = 0;
+
 	int height(Node* n) const
 	{
 		if (n) return n->height;
 		else return 0;
+	};
+
+	int bfactor(Node* n)
+	{
+		return height(n->right) - height(n->left);
 	};
 
 	Node* balance(Node* n)
@@ -72,17 +79,40 @@ private:
 		Node* t;
 		if (rotate == 'r')
 		{
-
+			t = n->left;
+			n->left = t->right;
+			t->right = n;
 		}
-	}
+		else if (rotate == 'l')
+		{
+			t = n->right;
+			n->right = t->left;
+			x->left = n;
+		}
+		else throw std::domain_error("bad parameters given");
+
+		hrepair(n);
+		hrepair(t);
+		return t;
+	};
+
+	void hrepair(Node* n)
+	{
+		int hleft = height(n->left);
+		int hright = height(n->right);
+
+		if (hleft > hright)
+			n->height = 1 + hleft;
+		else
+			n->height = 1 + hright;
+	};
 
 	Node* insert(Node* n, const KeyType& k, const ValueType& v)
 	{
-		Node* t;
 		if (n == nullptr)
 		{
-			t = new Node(k, v);
-			return t;
+			s++;
+			return new Node(k, v);
 		}
 
 		if (k < n->key)
@@ -92,8 +122,33 @@ private:
 		return balance(n);
 
 	};
+	
+	void clean(Node* n)
+	{
+		if (n)
+		{
+			clean(n->left);
+			clean(n->right);
+			delete n;
+			s = 0;
+		}
+	}
 public:
-	size_t size() const;
+
+	AVLTree()
+	{
+		root = nullptr;
+	};
+
+	~AVLTree()
+	{
+		clean(root);
+	};
+
+	size_t size() const
+	{
+		return s;
+	}
 
 	void insert(KeyType const& key, ValueType const& value)
 	{
