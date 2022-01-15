@@ -4,6 +4,7 @@
 #include <string>
 #include <ostream>
 #include <iomanip>
+#include <iostream>
 
 template<typename KeyType, typename ValueType>
 class AVLTree
@@ -25,9 +26,8 @@ private:
 	};
 	Node* root;
 
-	int s = 0;
 
-	int height(Node* n) const
+	unsigned int height(Node* n) const
 	{
 		if (n) return n->height;
 		else return 0;
@@ -110,10 +110,7 @@ private:
 	Node* insert(Node* n, const KeyType& k, const ValueType& v)
 	{
 		if (n == nullptr)
-		{
-			s++;
 			return new Node(k, v);
-		}
 
 		if (k < n->key)
 			n->left = insert(n->left, k, v);
@@ -130,7 +127,6 @@ private:
 			clean(n->left);
 			clean(n->right);
 			delete n;
-			s = 0;
 		}
 	}
 public:
@@ -147,7 +143,7 @@ public:
 
 	size_t size() const
 	{
-		return s;
+		return height(root);
 	}
 
 	void insert(KeyType const& key, ValueType const& value)
@@ -170,7 +166,7 @@ public:
 	{
 		if (!n) return;
 		print(st, n->left);
-		cout << "[" << n->key << "|" << n->value << "] ";
+		std::cout << "[" << n->key << "|" << n->value << "] ";
 		print(st, n->right);
 	};
 };

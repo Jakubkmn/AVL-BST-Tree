@@ -4,6 +4,7 @@
 #include <string>
 #include <ostream>
 #include <iomanip>
+#include <iostream>
 
 template<typename KeyType, typename ValueType>
 class BinarySearchTree
@@ -44,32 +45,81 @@ private:
 
 	Node* remove(Node* n, const KeyType& k)
 	{
-		if (!n)
-			throw std::domain_error("critical exception");
+		Node* q;
+
+		if (n == nullptr)
+			return nullptr;
+
+		if (n->left == nullptr && n->right == nullptr)
+		{
+			if (n == root)
+				root = nullptr;
+			delete n;
+			return nullptr;
+		}
+
 		if (k < n->key)
 			n->left = remove(n->left, k);
 		else if (k > n->key)
 			n->right = remove(n->right, k);
 		else
 		{
-			Node* lnode = n->left;
-			Node* rnode = n->right;
-			delete n;
+			if (height(n->left) > height(n->right))
+			{
+				q = InPre(n->left);
+				n->key = q->key;
+				n->left = remove(n->left, q->key);
+			}
+			else
+			{
+				q = InSucc(n->right);
+				n->key = q->key;
+				n->right = remove(n->right, q->key);
+			}
 		}
+		return n;
 	};
 
-	Node* find(Node* n, const KeyType& k)
+	template<typename K, typename I>
+	void _find(Node* n, const K& k) const
 	{
 		if (!n)
 			throw std::domain_error("critical exception");
 		if (n->key == k)
 			return n;
 		if (n->key < k)
-			return find(n->right, k);
+			return _find<K, I>(n->right, k);
 		else if (n->key > k)
-			return find(n->left, k);
+			return _find<K, I>(n->left, k);
 		else
 			throw std::domain_error("element not found");
+	};
+
+	unsigned int height(Node* n)
+	{
+		int x;
+		int y;
+		if (n == nullptr)
+		{
+			return 0;
+		}
+		x = height(n->left);
+		y = height(n->right);
+		return x > y ? x + 1 : y + 1;
+	};
+
+	Node* InPre(Node* n)
+	{
+		while (n && n->right != nullptr)
+			n = n->right;
+		return n;
+	};
+
+	Node* InSucc(Node* n)
+	{
+		while (n && n->left != nullptr)
+			n = n->left;
+		return n;
 	};
 
 	void clean(Node* n)
@@ -82,6 +132,16 @@ private:
 			s = 0;
 		}
 	};
+
+	std::string toString(Node* n)
+	{
+		std::string result = "";
+		if (n == nullptr)
+			return "";
+		result += toString(n->left);
+		result += toString(n->right);
+		return result;
+	}
 public:
 
 	BinarySearchTree()
@@ -94,7 +154,10 @@ public:
 		clean(root);
 	};
 
-	size_t size() const;
+	size_t size() const
+	{
+		return height(root);
+	}
 
 	void insert(KeyType const& key, ValueType const& value)
 	{
@@ -103,23 +166,19 @@ public:
 	
 	void remove(KeyType const& key)
 	{
-		//try
-	
-			root = remove(root, key);
-		/*catch (element_not_found)
-		{
-			throw element_not_found();
-		}*/
+		root = remove(root, key);
 	};
 
 	ValueType* find(KeyType const& key)
 	{
-		  Node* t = find(this->root, key);
-		  return t->value;
+		return _find<const KeyType, ValueType>(root, key)->value;
 	};
 
-	std::string toString() const;
-
+	std::string toString() const
+	{
+		return std::to_string(root->key) + std::to_string(root->value);
+	};
+	
 	template<typename StreamType>
 	void print(StreamType& stream) const
 	{
@@ -131,7 +190,7 @@ public:
 	{
 		if (!n) return;
 		print(st, n->left);
-		cout << "[" << n->key << "|" << n->value << "] ";
+		std::cout << "[" << n->key << "|" << n->value << "] ";
 		print(st, n->right);
 	};
 };
