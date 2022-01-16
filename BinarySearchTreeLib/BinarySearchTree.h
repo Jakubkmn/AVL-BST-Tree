@@ -26,14 +26,15 @@ private:
 	};
 	Node* root;
 
-	int s = 0;
-
 	Node* insert(Node* n, const KeyType& k, const ValueType& v)
 	{
 		if (n == nullptr)
-		{
-			s++;
 			return new Node(k ,v);
+
+		if (k == n->key)
+		{
+			n->value = v;
+			return n;
 		}
 
 		if (k < n->key)
@@ -49,50 +50,51 @@ private:
 
 		if (n == nullptr)
 			return nullptr;
-
-		if (n->left == nullptr && n->right == nullptr)
-		{
-			if (n == root)
-				root = nullptr;
-			delete n;
-			return nullptr;
-		}
-
-		if (k < n->key)
+		else if (k < n->key)
 			n->left = remove(n->left, k);
 		else if (k > n->key)
 			n->right = remove(n->right, k);
+		else if(n->left && n->right)
+		{
+			q = findmin(n->right);
+			n->key = q->key;
+			n->right = remove(n->right, n->key);
+		}
 		else
 		{
-			if (height(n->left) > height(n->right))
-			{
-				q = InPre(n->left);
-				n->key = q->key;
-				n->left = remove(n->left, q->key);
-			}
-			else
-			{
-				q = InSucc(n->right);
-				n->key = q->key;
-				n->right = remove(n->right, q->key);
-			}
+			q = n;
+			if (n->left == nullptr)
+				n = n->right;
+			else if (n->right == nullptr)
+				n = n->left;
+			delete q;
 		}
 		return n;
+		
 	};
 
-	template<typename K, typename I>
-	void _find(Node* n, const K& k) const
+	Node* findmin(Node* n)
+	{
+		if (n == nullptr)
+			return nullptr;
+		else if (n->left == nullptr)
+			return n;
+		else
+			return findmin(n->left);
+	}
+
+	Node* _find(Node* n, const KeyType& k) const
 	{
 		if (!n)
-			throw std::domain_error("critical exception");
+			return nullptr;
 		if (n->key == k)
 			return n;
 		if (n->key < k)
-			return _find<K, I>(n->right, k);
+			return _find(n->right, k);
 		else if (n->key > k)
-			return _find<K, I>(n->left, k);
+			return _find(n->left, k);
 		else
-			throw std::domain_error("element not found");
+			return nullptr;
 	};
 
 	unsigned int height(Node* n)
@@ -129,19 +131,25 @@ private:
 			clean(n->left);
 			clean(n->right);
 			delete n;
-			s = 0;
 		}
 	};
 
-	std::string toString(Node* n)
+	std::string rPrint(Node* n) const
 	{
-		std::string result = "";
 		if (n == nullptr)
 			return "";
-		result += toString(n->left);
-		result += toString(n->right);
-		return result;
-	}
+		std::stringstream output;
+		output << '(' << '[';
+		output << n->key << ',' << n->value << ']';
+		output << ',';
+		if (n->left)
+			output << rPrint(n->left);
+		output << ',';
+		if (n->right)
+			output << rPrint(n->right);
+		output << ')';
+		return output.str();
+	};
 public:
 
 	BinarySearchTree()
@@ -171,27 +179,33 @@ public:
 
 	ValueType* find(KeyType const& key)
 	{
-		return _find<const KeyType, ValueType>(root, key)->value;
+		try {
+			return &(_find(root, key)->value);
+		}
+		catch (const std::domain_error &e)
+		{
+			return nullptr;
+		}
 	};
 
 	std::string toString() const
 	{
-		return std::to_string(root->key) + std::to_string(root->value);
+		return rPrint(root);
 	};
 	
 	template<typename StreamType>
 	void print(StreamType& stream) const
 	{
-		print(stream, root);
+		_print(stream, root);
 	};
 
 	template<typename StreamType>
-	void print(StreamType& st, Node* n) const
+	void _print(StreamType& st, Node* n) const
 	{
 		if (!n) return;
-		print(st, n->left);
-		std::cout << "[" << n->key << "|" << n->value << "] ";
-		print(st, n->right);
+		_print(st, n->left);
+		std::cout << "[" << n->key << "," << n->value << "]\n";
+		_print(st, n->right);
 	};
 };
 

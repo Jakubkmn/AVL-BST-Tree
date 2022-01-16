@@ -51,7 +51,7 @@ private:
 		}
 		if (bfactor(n) == -2)
 		{
-			if (bfactor(n->left > 0))
+			if (bfactor(n->left) > 0)
 				n->left = Lrotate(n->left);
 			return Rrotate(n);
 		}
@@ -87,7 +87,7 @@ private:
 		{
 			t = n->right;
 			n->right = t->left;
-			x->left = n;
+			t->left = n;
 		}
 		else throw std::domain_error("bad parameters given");
 
@@ -111,13 +111,31 @@ private:
 	{
 		if (n == nullptr)
 			return new Node(k, v);
-
+		if (n->key == k)
+		{
+			n->value = v;
+			return n;
+		}
 		if (k < n->key)
 			n->left = insert(n->left, k, v);
 		else
 			n->right = insert(n->right, k, v);
 		return balance(n);
 
+	};
+
+	Node* _find(Node* n, const KeyType& k) const
+	{
+		if (!n)
+			return nullptr;
+		if (n->key == k)
+			return n;
+		if (n->key < k)
+			return _find(n->right, k);
+		else if (n->key > k)
+			return _find(n->left, k);
+		else
+			return nullptr;
 	};
 	
 	void clean(Node* n)
@@ -128,7 +146,24 @@ private:
 			clean(n->right);
 			delete n;
 		}
-	}
+	};
+
+	std::string rPrint(Node* n) const
+	{
+		if (n == nullptr)
+			return "";
+		std::stringstream output;
+		output << '(' << '[';
+		output << n->key << ',' << n->value << ']';
+		output << ',';
+		if (n->left)
+			output << rPrint(n->left);
+		output << ',';
+		if (n->right)
+			output << rPrint(n->right);
+		output << ')';
+		return output.str();
+	};
 public:
 
 	AVLTree()
@@ -151,9 +186,15 @@ public:
 		root = insert(root, key, value);
 	}
 
-	ValueType* find(KeyType const& key);
+	ValueType* find(KeyType const& key)
+	{
+		return &(_find(root, key)->value);
+	};
 
-	std::string toString() const;
+	std::string toString() const
+	{
+		return rPrint(root);
+	};
 
 	template<typename StreamType>
 	void print(StreamType& stream) const
