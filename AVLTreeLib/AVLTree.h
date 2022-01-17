@@ -232,8 +232,8 @@ AVLTree<std::string, int>& counter(const std::string& fileName)
 
 	AVLTree<string, int> tree;
 	int i = 1;
-	if (file.is_open()
-		while (file.good())
+	if (file.is_open())
+		while (!file.good())
 		{
 			string word;
 				file >> word;
