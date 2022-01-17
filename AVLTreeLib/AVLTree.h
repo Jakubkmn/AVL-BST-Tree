@@ -5,6 +5,7 @@
 #include <ostream>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 
 template<typename KeyType, typename ValueType>
 class AVLTree
@@ -26,6 +27,7 @@ private:
 	};
 	Node* root;
 
+	size_t _size = 0;
 
 	unsigned int height(Node* n) const
 	{
@@ -110,7 +112,10 @@ private:
 	Node* insert(Node* n, const KeyType& k, const ValueType& v)
 	{
 		if (n == nullptr)
+		{
+			_size++;
 			return new Node(k, v);
+		}
 		if (n->key == k)
 		{
 			n->value = v;
@@ -178,7 +183,7 @@ public:
 
 	size_t size() const
 	{
-		return height(root);
+		return _size;
 	}
 
 	void insert(KeyType const& key, ValueType const& value)
@@ -207,7 +212,7 @@ public:
 	{
 		if (!n) return;
 		print(st, n->left);
-		std::cout << "[" << n->key << "|" << n->value << "] ";
+		std::cout << "[" << n->key << "," << n->value << "]\n ";
 		print(st, n->right);
 	};
 };
@@ -217,4 +222,33 @@ std::ostream& operator <<(std::ostream& stream, AVLTree<KeyType, ValueType> cons
 {
 	tree.print<std::ostream>(stream);
 	return stream;
+}
+
+template<typename KeyType, typename ValueType>
+AVLTree<std::string, int>& counter(const std::string& fileName)
+{
+	using namespace std;
+	ifstream file(fileName);
+
+	AVLTree<string, int> tree;
+	int i = 1;
+	if (file.is_open()
+		while (file.good())
+		{
+			string word;
+				file >> word;
+
+				if (tree.find(word) == tree.end())
+					tree.insert(word, 1);
+				else
+					tree.insert(word, i++);
+		}
+	else
+		return throw domain_error("");
+}
+
+template<typename KeyType, typename ValueType>
+void listing(const AVLTree <std::string, int>&)
+{
+
 }

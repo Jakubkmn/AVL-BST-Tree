@@ -26,10 +26,15 @@ private:
 	};
 	Node* root;
 
+	size_t _size = 0;
+
 	Node* insert(Node* n, const KeyType& k, const ValueType& v)
 	{
 		if (n == nullptr)
-			return new Node(k ,v);
+		{
+			_size++;
+			return new Node(k, v);
+		}
 
 		if (k == n->key)
 		{
@@ -67,6 +72,7 @@ private:
 				n = n->right;
 			else if (n->right == nullptr)
 				n = n->left;
+			_size--;
 			delete q;
 		}
 		return n;
@@ -110,20 +116,6 @@ private:
 		return x > y ? x + 1 : y + 1;
 	};
 
-	Node* InPre(Node* n)
-	{
-		while (n && n->right != nullptr)
-			n = n->right;
-		return n;
-	};
-
-	Node* InSucc(Node* n)
-	{
-		while (n && n->left != nullptr)
-			n = n->left;
-		return n;
-	};
-
 	void clean(Node* n)
 	{
 		if (n)
@@ -164,7 +156,7 @@ public:
 
 	size_t size() const
 	{
-		return height(root);
+		return _size;
 	}
 
 	void insert(KeyType const& key, ValueType const& value)
